@@ -1,240 +1,746 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>MICI5400GPT</title>
+    <title>
+        Infectious Disease AI Assistant
+    </title>
+
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
+
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
             background: #111827;
             color: #f9fafb;
+
             height: 100vh;
             overflow: hidden;
         }
 
+
+        /*
+        ==========================================
+        MAIN APPLICATION
+        ==========================================
+        */
+
         .app {
             display: flex;
             flex-direction: column;
+
             height: 100vh;
-            max-width: 1000px;
+
+            max-width: 1100px;
             margin: 0 auto;
-            border-left: 1px solid #273244;
-            border-right: 1px solid #273244;
+
             background: #0f172a;
+
+            border-left:
+                1px solid #273244;
+
+            border-right:
+                1px solid #273244;
         }
 
+
+        /*
+        ==========================================
+        HEADER
+        ==========================================
+        */
+
         .header {
-            padding: 18px 24px;
-            border-bottom: 1px solid #273244;
+            padding: 16px 22px;
+
+            border-bottom:
+                1px solid #273244;
+
+            background: #111827;
+
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #111827;
+
+            gap: 20px;
         }
+
 
         .header-left h1 {
             margin: 0;
+
             font-size: 20px;
             font-weight: 600;
         }
 
+
         .header-left p {
             margin: 5px 0 0;
+
             color: #9ca3af;
+
             font-size: 13px;
         }
 
-        .clear-button {
-            border: 1px solid #374151;
-            background: transparent;
-            color: #d1d5db;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+
+            gap: 16px;
+
+            flex-wrap: wrap;
         }
 
-        .clear-button:hover {
-            background: #1f2937;
-            color: white;
+
+        /*
+        ==========================================
+        TOGGLES
+        ==========================================
+        */
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+
+            gap: 6px;
+
+            font-size: 13px;
+
+            color: #d1d5db;
+
+            cursor: pointer;
         }
+
+
+        .toggle-row input {
+            width: 17px;
+            height: 17px;
+
+            cursor: pointer;
+        }
+
+
+        .toggle-row input:disabled {
+            cursor: not-allowed;
+        }
+
+
+        .toggle-row.disabled {
+            opacity: 0.45;
+        }
+
+
+        /*
+        ==========================================
+        CLEAR BUTTON
+        ==========================================
+        */
+
+        .clear-button {
+            border:
+                1px solid #374151;
+
+            background:
+                transparent;
+
+            color:
+                #d1d5db;
+
+            padding:
+                8px 14px;
+
+            border-radius:
+                8px;
+
+            cursor:
+                pointer;
+
+            font-size:
+                13px;
+        }
+
+
+        .clear-button:hover {
+            background:
+                #1f2937;
+
+            color:
+                white;
+        }
+
+
+        /*
+        ==========================================
+        CHAT
+        ==========================================
+        */
 
         .chat-container {
             flex: 1;
+
             overflow-y: auto;
+
             padding: 28px;
         }
 
+
+        /*
+        ==========================================
+        WELCOME
+        ==========================================
+        */
+
         .welcome {
             max-width: 650px;
+
             margin: 90px auto;
+
             text-align: center;
+
             color: #d1d5db;
         }
 
+
         .welcome h2 {
             font-size: 28px;
+
             margin-bottom: 10px;
         }
 
+
         .welcome p {
             color: #9ca3af;
+
             line-height: 1.6;
         }
 
+
+        .welcome-mode {
+            margin-top: 25px;
+
+            font-size: 13px;
+
+            color: #6b7280;
+        }
+
+
+        /*
+        ==========================================
+        CHAT MESSAGES
+        ==========================================
+        */
+
         .message-row {
             display: flex;
+
             margin-bottom: 22px;
         }
+
 
         .message-row.user {
             justify-content: flex-end;
         }
 
+
         .message-row.assistant {
             justify-content: flex-start;
         }
 
+
         .message {
-            max-width: 75%;
-            padding: 14px 17px;
-            border-radius: 16px;
+            max-width: 78%;
+
+            padding:
+                14px 17px;
+
+            border-radius:
+                16px;
+
             line-height: 1.6;
+
             font-size: 15px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+
+            white-space:
+                pre-wrap;
+
+            word-wrap:
+                break-word;
         }
+
 
         .user .message {
             background: #2563eb;
+
             color: white;
-            border-bottom-right-radius: 5px;
+
+            border-bottom-right-radius:
+                5px;
         }
+
 
         .assistant .message {
             background: #1f2937;
+
             color: #f3f4f6;
-            border-bottom-left-radius: 5px;
+
+            border-bottom-left-radius:
+                5px;
         }
+
 
         .loading {
             color: #9ca3af;
+
             font-style: italic;
         }
 
-        .input-wrapper {
-            padding: 18px 24px 22px;
-            background: #111827;
-            border-top: 1px solid #273244;
+
+        /*
+        ==========================================
+        RAG INDICATOR
+        ==========================================
+        */
+
+        .rag-indicator {
+            margin:
+                -8px 0 18px;
+
+            font-size: 11px;
+
+            color: #93c5fd;
         }
+
+
+        /*
+        ==========================================
+        RAG TRACE
+        ==========================================
+        */
+
+        .rag-debug {
+            margin:
+                10px 0 30px;
+
+            padding: 18px;
+
+            background: #111827;
+
+            border:
+                1px solid #374151;
+
+            border-radius:
+                12px;
+
+            font-size: 13px;
+        }
+
+
+        .rag-debug h3 {
+            margin:
+                0 0 5px;
+
+            color: #93c5fd;
+
+            font-size: 16px;
+        }
+
+
+        .rag-debug-description {
+            color: #9ca3af;
+
+            margin-bottom: 16px;
+
+            line-height: 1.5;
+        }
+
+
+        .rag-step {
+            margin-top: 18px;
+
+            padding-top: 16px;
+
+            border-top:
+                1px solid #374151;
+        }
+
+
+        .rag-step:first-of-type {
+            border-top: none;
+
+            padding-top: 0;
+        }
+
+
+        .rag-step-title {
+            font-weight: bold;
+
+            margin-bottom: 10px;
+
+            color: #d1d5db;
+
+            font-size: 14px;
+        }
+
+
+        /*
+        ==========================================
+        SOURCE CHUNKS
+        ==========================================
+        */
+
+        .source-chunk {
+            background: #1f2937;
+
+            padding: 13px;
+
+            margin: 10px 0;
+
+            border-radius: 8px;
+
+            line-height: 1.55;
+        }
+
+
+        .source-header {
+            color: #93c5fd;
+
+            margin-bottom: 8px;
+
+            font-weight: bold;
+
+            font-size: 12px;
+        }
+
+
+        .source-text {
+            color: #e5e7eb;
+
+            white-space: pre-wrap;
+        }
+
+
+        /*
+        ==========================================
+        AUGMENTED PROMPT
+        ==========================================
+        */
+
+        .rag-code {
+            background: #030712;
+
+            padding: 14px;
+
+            border-radius: 8px;
+
+            overflow-x: auto;
+
+            white-space: pre-wrap;
+
+            color: #d1d5db;
+
+            max-height: 450px;
+
+            overflow-y: auto;
+
+            line-height: 1.5;
+
+            font-family: monospace;
+        }
+
+
+        /*
+        ==========================================
+        FINAL RAG ANSWER
+        ==========================================
+        */
+
+        .rag-answer {
+            background: #1f2937;
+
+            border-left:
+                3px solid #2563eb;
+
+            padding: 14px;
+
+            border-radius: 8px;
+
+            color: #f3f4f6;
+
+            line-height: 1.6;
+
+            white-space: pre-wrap;
+        }
+
+
+        /*
+        ==========================================
+        INPUT
+        ==========================================
+        */
+
+        .input-wrapper {
+            padding:
+                16px 22px 20px;
+
+            background: #111827;
+
+            border-top:
+                1px solid #273244;
+        }
+
 
         .input-box {
             display: flex;
+
             gap: 10px;
+
             align-items: flex-end;
-            border: 1px solid #374151;
+
+            border:
+                1px solid #374151;
+
             border-radius: 14px;
+
             background: #1f2937;
+
             padding: 10px;
         }
 
+
         textarea {
             flex: 1;
+
             resize: none;
+
             border: none;
+
             outline: none;
+
             background: transparent;
+
             color: white;
+
             font-size: 15px;
+
             font-family: inherit;
+
             min-height: 48px;
+
             max-height: 180px;
+
             padding: 10px;
         }
+
 
         textarea::placeholder {
             color: #6b7280;
         }
 
+
+        /*
+        ==========================================
+        SEND BUTTON
+        ==========================================
+        */
+
         .send-button {
             border: none;
+
             background: #2563eb;
+
             color: white;
+
             width: 44px;
             height: 44px;
+
             border-radius: 10px;
+
             cursor: pointer;
+
             font-size: 19px;
+
             display: flex;
+
             justify-content: center;
             align-items: center;
         }
+
 
         .send-button:hover {
             background: #1d4ed8;
         }
 
+
         .send-button:disabled {
             background: #374151;
+
             cursor: default;
         }
 
+
+        /*
+        ==========================================
+        FOOTER
+        ==========================================
+        */
+
         .footer-text {
             text-align: center;
+
             color: #6b7280;
+
             font-size: 11px;
+
             margin-top: 10px;
         }
 
-        @media (max-width: 700px) {
+
+        /*
+        ==========================================
+        RESPONSIVE
+        ==========================================
+        */
+
+        @media (max-width: 800px) {
+
+            .header {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+
+            .header-controls {
+                width: 100%;
+
+                justify-content: flex-start;
+            }
+
+
             .chat-container {
                 padding: 16px;
             }
 
+
             .message {
-                max-width: 90%;
+                max-width: 92%;
             }
 
-            .header {
-                padding: 14px 16px;
-            }
 
             .input-wrapper {
                 padding: 12px;
             }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="app">
 
+
+    <!-- ========================================
+         HEADER
+         ======================================== -->
+
     <div class="header">
+
         <div class="header-left">
-            <h1>MICI5400GPT</h1>
-            <p>Local LLM · Workshop Environment</p>
+
+            <h1>
+                Infectious Disease AI Assistant
+            </h1>
+
+            <p>
+                Local LLM · RAG Workshop Environment
+            </p>
+
         </div>
 
-        <button
-            class="clear-button"
-            onclick="clearChat()"
-        >
-            Clear chat
-        </button>
+
+        <div class="header-controls">
+
+
+            <!-- RAG -->
+
+            <label class="toggle-row">
+
+                <input
+                    type="checkbox"
+                    id="ragToggle"
+                    onchange="updateRagControls()"
+                >
+
+                <span>
+                    RAG
+                </span>
+
+            </label>
+
+
+            <!-- VERBOSE RAG -->
+
+            <label
+                class="toggle-row disabled"
+                id="verboseLabel"
+            >
+
+                <input
+                    type="checkbox"
+                    id="verboseToggle"
+                    disabled
+                >
+
+                <span>
+                    Verbose RAG
+                </span>
+
+            </label>
+
+
+            <!-- CLEAR -->
+
+            <button
+                class="clear-button"
+                onclick="clearChat()"
+            >
+                Clear chat
+            </button>
+
+        </div>
+
     </div>
 
+
+
+    <!-- ========================================
+         CHAT
+         ======================================== -->
 
     <div
         id="chat"
@@ -245,18 +751,34 @@
             id="welcome"
             class="welcome"
         >
-            <h2>How can I help?</h2>
+
+            <h2>
+                How can I help?
+            </h2>
 
             <p>
                 Ask a question about infectious diseases.
-                Later, this assistant will retrieve supporting
-                evidence from the workshop document collection
-                before generating its response.
+                Enable RAG to retrieve information from the
+                workshop document collection before generating
+                an answer.
             </p>
+
+            <div
+                id="welcomeMode"
+                class="welcome-mode"
+            >
+                Current mode: Base language model
+            </div>
+
         </div>
 
     </div>
 
+
+
+    <!-- ========================================
+         INPUT
+         ======================================== -->
 
     <div class="input-wrapper">
 
@@ -270,18 +792,22 @@
                 onkeydown="handleKey(event)"
             ></textarea>
 
+
             <button
                 id="sendButton"
                 class="send-button"
                 onclick="askModel()"
+                title="Send"
             >
                 ↑
             </button>
 
         </div>
 
+
         <div class="footer-text">
-            Local AI responses may contain errors. Verify important claims.
+            Local AI responses may contain errors.
+            Verify important scientific claims.
         </div>
 
     </div>
@@ -289,76 +815,304 @@
 </div>
 
 
+
 <script>
 
-const chat = document.getElementById("chat");
-const questionBox = document.getElementById("question");
-const sendButton = document.getElementById("sendButton");
+
+/*
+=============================================
+ELEMENT REFERENCES
+=============================================
+*/
+
+const chat =
+    document.getElementById(
+        "chat"
+    );
 
 
-function addMessage(role, text, id = null) {
+const questionBox =
+    document.getElementById(
+        "question"
+    );
 
-    const welcome =
-        document.getElementById("welcome");
 
-    if (welcome) {
-        welcome.remove();
+const sendButton =
+    document.getElementById(
+        "sendButton"
+    );
+
+
+const ragToggle =
+    document.getElementById(
+        "ragToggle"
+    );
+
+
+const verboseToggle =
+    document.getElementById(
+        "verboseToggle"
+    );
+
+
+const verboseLabel =
+    document.getElementById(
+        "verboseLabel"
+    );
+
+
+
+/*
+=============================================
+RAG CONTROLS
+=============================================
+*/
+
+function updateRagControls() {
+
+    if (ragToggle.checked) {
+
+        verboseToggle.disabled =
+            false;
+
+
+        verboseLabel.classList.remove(
+            "disabled"
+        );
+
     }
 
+    else {
+
+        verboseToggle.checked =
+            false;
+
+
+        verboseToggle.disabled =
+            true;
+
+
+        verboseLabel.classList.add(
+            "disabled"
+        );
+
+    }
+
+
+    /*
+    Update welcome screen if it still exists.
+    */
+
+    const welcomeMode =
+        document.getElementById(
+            "welcomeMode"
+        );
+
+
+    if (welcomeMode) {
+
+        if (ragToggle.checked) {
+
+            welcomeMode.textContent =
+                "Current mode: Retrieval-Augmented Generation";
+
+        }
+
+        else {
+
+            welcomeMode.textContent =
+                "Current mode: Base language model";
+
+        }
+
+    }
+
+}
+
+
+
+/*
+=============================================
+ADD CHAT MESSAGE
+=============================================
+*/
+
+function addMessage(
+    role,
+    text
+) {
+
+    const welcome =
+        document.getElementById(
+            "welcome"
+        );
+
+
+    if (welcome) {
+
+        welcome.remove();
+
+    }
+
+
     const row =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     row.className =
         "message-row " + role;
 
-    if (id) {
-        row.id = id;
-    }
 
     const message =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
-    message.className = "message";
-    message.textContent = text;
 
-    row.appendChild(message);
-    chat.appendChild(row);
+    message.className =
+        "message";
+
+
+    /*
+    textContent prevents model output from
+    injecting arbitrary HTML.
+    */
+
+    message.textContent =
+        text;
+
+
+    row.appendChild(
+        message
+    );
+
+
+    chat.appendChild(
+        row
+    );
+
 
     chat.scrollTop =
         chat.scrollHeight;
 
+
     return message;
+
 }
 
+
+
+/*
+=============================================
+RAG INDICATOR
+=============================================
+*/
+
+function addRagIndicator() {
+
+    const indicator =
+        document.createElement(
+            "div"
+        );
+
+
+    indicator.className =
+        "rag-indicator";
+
+
+    indicator.textContent =
+        "Answer generated using retrieved document context";
+
+
+    chat.appendChild(
+        indicator
+    );
+
+}
+
+
+
+/*
+=============================================
+SEND QUESTION
+=============================================
+*/
 
 async function askModel() {
 
     const question =
         questionBox.value.trim();
 
+
     if (!question) {
+
         return;
+
     }
+
+
+    /*
+    Capture mode when request begins.
+    */
+
+    const useRag =
+        ragToggle.checked;
+
+
+    const verboseRag =
+        verboseToggle.checked;
+
+
+    /*
+    Show question.
+    */
 
     addMessage(
         "user",
         question
     );
 
-    questionBox.value = "";
-    questionBox.style.height = "auto";
 
-    sendButton.disabled = true;
+    /*
+    Clear input.
+    */
+
+    questionBox.value =
+        "";
+
+
+    questionBox.style.height =
+        "auto";
+
+
+    /*
+    Prevent duplicate requests.
+    */
+
+    sendButton.disabled =
+        true;
+
+
+    /*
+    Temporary response bubble.
+    */
 
     const loadingMessage =
         addMessage(
             "assistant",
-            "Generating response..."
+
+            useRag
+                ? "Retrieving evidence and generating response..."
+                : "Generating response..."
         );
+
 
     loadingMessage.classList.add(
         "loading"
     );
+
 
     try {
 
@@ -366,27 +1120,73 @@ async function askModel() {
             await fetch(
                 "/ask",
                 {
-                    method: "POST",
+
+                    method:
+                        "POST",
+
 
                     headers: {
+
                         "Content-Type":
                             "application/json"
+
                     },
 
-                    body: JSON.stringify({
-                        question: question
-                    })
+
+                    body:
+                        JSON.stringify({
+
+                            question:
+                                question,
+
+                            use_rag:
+                                useRag,
+
+                            verbose_rag:
+                                verboseRag
+
+                        })
+
                 }
             );
 
-        const data =
-            await response.json();
+
+        /*
+        Attempt to parse JSON.
+        */
+
+        let data;
+
+
+        try {
+
+            data =
+                await response.json();
+
+        }
+
+        catch (jsonError) {
+
+            throw new Error(
+                "The server returned an invalid response."
+            );
+
+        }
+
 
         loadingMessage.classList.remove(
             "loading"
         );
 
-        if (!response.ok || data.error) {
+
+        /*
+        Error returned by Flask.
+        */
+
+        if (
+            !response.ok ||
+            data.error
+        ) {
 
             loadingMessage.textContent =
                 "Error: " +
@@ -395,16 +1195,66 @@ async function askModel() {
                     "Request failed."
                 );
 
+
+            return;
+
         }
 
-        else {
 
-            loadingMessage.textContent =
-                data.answer;
+        /*
+        =====================================
+        NORMAL RESPONSE
+        =====================================
+
+        The answer is ALWAYS displayed in the
+        normal assistant bubble.
+
+        This applies to:
+
+        - baseline
+        - RAG
+        - verbose RAG
+        */
+
+        loadingMessage.textContent =
+            data.answer ||
+            "The model returned an empty response.";
+
+
+        /*
+        RAG indicator.
+        */
+
+        if (data.rag_used) {
+
+            addRagIndicator();
+
+        }
+
+
+        /*
+        =====================================
+        VERBOSE RAG TRACE
+        =====================================
+
+        In verbose mode, also show:
+
+        Step 1: retrieved chunks
+        Step 2: augmented prompt
+        Step 3: generated answer
+        */
+
+        if (data.rag_debug) {
+
+            showRagDebug(
+                data.rag_debug,
+                data.answer
+            );
 
         }
 
     }
+
 
     catch (error) {
 
@@ -412,46 +1262,509 @@ async function askModel() {
             "loading"
         );
 
+
         loadingMessage.textContent =
-            "Unable to contact the server.";
+            "Unable to complete the request: " +
+            error.message;
+
+
+        console.error(
+            error
+        );
 
     }
+
 
     finally {
 
-        sendButton.disabled = false;
+        sendButton.disabled =
+            false;
+
+
         questionBox.focus();
+
 
         chat.scrollTop =
             chat.scrollHeight;
+
     }
+
 }
 
 
+
+/*
+=============================================
+VERBOSE RAG TRACE
+=============================================
+*/
+
+function showRagDebug(
+    debug,
+    answer
+) {
+
+    const container =
+        document.createElement(
+            "div"
+        );
+
+
+    container.className =
+        "rag-debug";
+
+
+
+    /*
+    =========================================
+    TRACE HEADER
+    =========================================
+    */
+
+    const title =
+        document.createElement(
+            "h3"
+        );
+
+
+    title.textContent =
+        "RAG Trace";
+
+
+    container.appendChild(
+        title
+    );
+
+
+    const description =
+        document.createElement(
+            "div"
+        );
+
+
+    description.className =
+        "rag-debug-description";
+
+
+    description.textContent =
+        "This trace shows how external evidence was retrieved and added to the context supplied to the language model.";
+
+
+    container.appendChild(
+        description
+    );
+
+
+
+    /*
+    =========================================
+    STEP 1
+    RETRIEVED EVIDENCE
+    =========================================
+    */
+
+    const retrievalStep =
+        document.createElement(
+            "div"
+        );
+
+
+    retrievalStep.className =
+        "rag-step";
+
+
+    const retrievalTitle =
+        document.createElement(
+            "div"
+        );
+
+
+    retrievalTitle.className =
+        "rag-step-title";
+
+
+    retrievalTitle.textContent =
+        "Step 1 — Retrieved evidence";
+
+
+    retrievalStep.appendChild(
+        retrievalTitle
+    );
+
+
+    /*
+    No retrieved chunks.
+    */
+
+    if (
+        !debug.retrieved_chunks ||
+        debug.retrieved_chunks.length === 0
+    ) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+
+        empty.textContent =
+            "No evidence chunks were retrieved.";
+
+
+        retrievalStep.appendChild(
+            empty
+        );
+
+    }
+
+
+    /*
+    Show retrieved chunks.
+    */
+
+    else {
+
+        debug.retrieved_chunks
+            .forEach(
+                (
+                    chunk,
+                    index
+                ) => {
+
+
+                    /*
+                    Chunk container
+                    */
+
+                    const box =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    box.className =
+                        "source-chunk";
+
+
+
+                    /*
+                    Chunk metadata
+                    */
+
+                    const header =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    header.className =
+                        "source-header";
+
+
+                    let score =
+                        "NA";
+
+
+                    if (
+                        typeof chunk.score ===
+                        "number"
+                    ) {
+
+                        score =
+                            chunk.score.toFixed(
+                                3
+                            );
+
+                    }
+
+
+                    header.textContent =
+                        `Source ${index + 1} · ` +
+                        `${chunk.source} · ` +
+                        `chunk ${chunk.chunk_id} · ` +
+                        `similarity ${score}`;
+
+
+
+                    /*
+                    Chunk content
+                    */
+
+                    const text =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    text.className =
+                        "source-text";
+
+
+                    text.textContent =
+                        chunk.text ||
+                        "";
+
+
+                    box.appendChild(
+                        header
+                    );
+
+
+                    box.appendChild(
+                        text
+                    );
+
+
+                    retrievalStep.appendChild(
+                        box
+                    );
+
+                }
+            );
+
+    }
+
+
+    container.appendChild(
+        retrievalStep
+    );
+
+
+
+    /*
+    =========================================
+    STEP 2
+    AUGMENTED PROMPT
+    =========================================
+    */
+
+    const promptStep =
+        document.createElement(
+            "div"
+        );
+
+
+    promptStep.className =
+        "rag-step";
+
+
+    const promptTitle =
+        document.createElement(
+            "div"
+        );
+
+
+    promptTitle.className =
+        "rag-step-title";
+
+
+    promptTitle.textContent =
+        "Step 2 — Augmented prompt sent to the LLM";
+
+
+    promptStep.appendChild(
+        promptTitle
+    );
+
+
+    const prompt =
+        document.createElement(
+            "div"
+        );
+
+
+    prompt.className =
+        "rag-code";
+
+
+    prompt.textContent =
+        debug.augmented_prompt ||
+        "No augmented prompt was returned.";
+
+
+    promptStep.appendChild(
+        prompt
+    );
+
+
+    container.appendChild(
+        promptStep
+    );
+
+
+
+    /*
+    =========================================
+    STEP 3
+    GENERATED ANSWER
+    =========================================
+    */
+
+    const generationStep =
+        document.createElement(
+            "div"
+        );
+
+
+    generationStep.className =
+        "rag-step";
+
+
+    const generationTitle =
+        document.createElement(
+            "div"
+        );
+
+
+    generationTitle.className =
+        "rag-step-title";
+
+
+    generationTitle.textContent =
+        "Step 3 — Generated answer";
+
+
+    generationStep.appendChild(
+        generationTitle
+    );
+
+
+    /*
+    Explicitly display the generated answer
+    as the final stage of the RAG pipeline.
+    */
+
+    const generationAnswer =
+        document.createElement(
+            "div"
+        );
+
+
+    generationAnswer.className =
+        "rag-answer";
+
+
+    generationAnswer.textContent =
+        answer ||
+        "The language model did not return an answer.";
+
+
+    generationStep.appendChild(
+        generationAnswer
+    );
+
+
+    container.appendChild(
+        generationStep
+    );
+
+
+
+    /*
+    =========================================
+    ADD COMPLETE TRACE
+    =========================================
+    */
+
+    chat.appendChild(
+        container
+    );
+
+
+    /*
+    Scroll to the bottom so Step 3 and the
+    generated answer are visible.
+    */
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+
+/*
+=============================================
+CLEAR CHAT
+=============================================
+*/
+
 function clearChat() {
 
+    /*
+    Preserve current RAG mode.
+    */
+
+    let modeText =
+        "Current mode: Base language model";
+
+
+    if (ragToggle.checked) {
+
+        modeText =
+            "Current mode: Retrieval-Augmented Generation";
+
+    }
+
+
     chat.innerHTML = `
+
         <div
             id="welcome"
             class="welcome"
         >
-            <h2>How can I help?</h2>
+
+            <h2>
+                How can I help?
+            </h2>
 
             <p>
                 Ask a question about infectious diseases.
-                Later, this assistant will retrieve supporting
-                evidence from the workshop document collection
-                before generating its response.
+                Enable RAG to retrieve information from the
+                workshop document collection before generating
+                an answer.
             </p>
+
+            <div
+                id="welcomeMode"
+                class="welcome-mode"
+            >
+                ${modeText}
+            </div>
+
         </div>
+
     `;
 
-    questionBox.value = "";
+
+    questionBox.value =
+        "";
+
+
+    questionBox.style.height =
+        "auto";
+
+
     questionBox.focus();
+
 }
 
 
-function handleKey(event) {
+
+/*
+=============================================
+KEYBOARD HANDLING
+=============================================
+*/
+
+function handleKey(
+    event
+) {
+
+    /*
+    Enter = submit
+    Shift + Enter = new line
+    */
 
     if (
         event.key === "Enter" &&
@@ -459,23 +1772,59 @@ function handleKey(event) {
     ) {
 
         event.preventDefault();
-        askModel();
+
+
+        if (!sendButton.disabled) {
+
+            askModel();
+
+        }
+
     }
+
 }
 
 
-function autoResize(element) {
 
-    element.style.height = "auto";
+/*
+=============================================
+AUTO RESIZE
+=============================================
+*/
+
+function autoResize(
+    element
+) {
+
+    element.style.height =
+        "auto";
+
 
     element.style.height =
         Math.min(
             element.scrollHeight,
             180
         ) + "px";
+
 }
+
+
+
+/*
+=============================================
+INITIALIZATION
+=============================================
+*/
+
+updateRagControls();
+
+
+questionBox.focus();
+
 
 </script>
 
+
 </body>
+
 </html>

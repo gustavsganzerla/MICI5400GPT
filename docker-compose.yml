@@ -5,22 +5,32 @@ services:
     container_name: workshop_web
     ports:
       - "5001:5000"
+
     environment:
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:1.7b}
+
+      EMBEDDING_MODEL: sentence-transformers/all-MiniLM-L6-v2
+      RAG_TOP_K: 4
+
     volumes:
       - ./app:/app
       - ./app/data:/app/data
+      - ./scripts:/scripts
+
     depends_on:
       - ollama
 
   ollama:
     image: ollama/ollama:latest
     container_name: workshop_ollama
+
     ports:
       - "11434:11434"
+
     volumes:
       - ollama_models:/root/.ollama
+
 
 volumes:
   ollama_models:

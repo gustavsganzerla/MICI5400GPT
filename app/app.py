@@ -3,6 +3,7 @@ import requests
 
 from flask import Flask, jsonify, render_template, request
 
+from rag import retrieve, build_augmented_prompt
 
 app = Flask(__name__)
 
@@ -53,32 +54,123 @@ def ask():
 
     if not data:
         return jsonify({
-            "error": "No JSON body provided"
+            "error":
+            "No JSON body provided"
         }), 400
 
-    question = data.get("question")
+
+    question = (
+        data
+        .get("question", "")
+        .strip()
+    )
+
+    use_rag = bool(
+        data.get(
+            "use_rag",
+            False
+        )
+    )
+
+    verbose_rag = bool(
+        data.get(
+            "verbose_rag",
+            False
+        )
+    )
+
 
     if not question:
+
         return jsonify({
-            "error": "Question is required"
+            "error":
+            "Question is required"
         }), 400
 
+
+    retrieved = []
+
+    augmented_prompt = None
+
+
+    #
+    # BASELINE MODEL
+    #
+
+    if not use_rag:
+
+        prompt = question
+
+
+    #
+    # RAG MODEL
+    #
+
+    else:
+
+        try:
+
+            retrieved = retrieve(
+                question
+            )
+
+        except Exception as exc:
+
+            return jsonify({
+                "error":
+                f"RAG retrieval failed: {exc}"
+            }), 500
+
+
+        augmented_prompt = (
+            build_augmented_prompt(
+                question,
+                retrieved
+            )
+        )
+
+        prompt = augmented_prompt
+
+
     payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": question,
-        "stream": False,
+
+        "model":
+            OLLAMA_MODEL,
+
+        "prompt":
+            prompt,
+
+        "stream":
+            False,
+
+        # Qwen models that support thinking
+        # can skip the additional reasoning pass.
+        "think":
+            False,
+
         "options": {
-            "num_predict": 300,
-            "temperature": 0.2
+
+            "num_predict":
+                250,
+
+            "temperature":
+                0.2,
+
+            "num_ctx":
+                4096
         }
     }
+
 
     try:
 
         response = requests.post(
+
             f"{OLLAMA_URL}/api/generate",
+
             json=payload,
-            timeout=180
+
+            timeout=300
         )
 
         response.raise_for_status()
@@ -86,15 +178,75 @@ def ask():
     except requests.RequestException as exc:
 
         return jsonify({
-            "error": str(exc)
+            "error":
+                str(exc)
         }), 500
+
 
     result = response.json()
 
-    return jsonify({
-        "question": question,
-        "answer": result.get("response", "")
-    })
+    answer = result.get(
+        "response",
+        ""
+    )
+
+
+    output = {
+
+        "question":
+            question,
+
+        "answer":
+            answer,
+
+        "rag_used":
+            use_rag
+    }
+
+
+    #
+    # Sources can be shown for RAG answers
+    #
+
+    if use_rag:
+
+        output["sources"] = [
+
+            {
+                "source":
+                    item["source"],
+
+                "chunk_id":
+                    item["chunk_id"],
+
+                "score":
+                    item["score"]
+            }
+
+            for item in retrieved
+        ]
+
+
+    #
+    # Verbose teaching mode
+    #
+
+    if (
+        use_rag and
+        verbose_rag
+    ):
+
+        output["rag_debug"] = {
+
+            "retrieved_chunks":
+                retrieved,
+
+            "augmented_prompt":
+                augmented_prompt
+        }
+
+
+    return jsonify(output)
 
 
 if __name__ == "__main__":
