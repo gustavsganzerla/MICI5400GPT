@@ -14,7 +14,7 @@ OLLAMA_URL = os.getenv(
 
 OLLAMA_MODEL = os.getenv(
     "OLLAMA_MODEL",
-    "qwen3:4b"
+    "qwen3:1.7b"
 )
 
 

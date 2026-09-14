@@ -4,10 +4,10 @@ services:
     build: ./app
     container_name: workshop_web
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       OLLAMA_URL: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:4b}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:1.7b}
     volumes:
       - ./app:/app
       - ./app/data:/app/data

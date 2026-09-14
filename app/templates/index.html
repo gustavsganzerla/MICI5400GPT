@@ -1,104 +1,481 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        Infectious Disease AI Workshop
-    </title>
+    <title>MICI5400GPT</title>
 
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #111827;
+            color: #f9fafb;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1000px;
+            margin: 0 auto;
+            border-left: 1px solid #273244;
+            border-right: 1px solid #273244;
+            background: #0f172a;
+        }
+
+        .header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #273244;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #111827;
+        }
+
+        .header-left h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-left p {
+            margin: 5px 0 0;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .clear-button {
+            border: 1px solid #374151;
+            background: transparent;
+            color: #d1d5db;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .clear-button:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+        }
+
+        .welcome {
+            max-width: 650px;
+            margin: 90px auto;
+            text-align: center;
+            color: #d1d5db;
+        }
+
+        .welcome h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .welcome p {
+            color: #9ca3af;
+            line-height: 1.6;
+        }
+
+        .message-row {
+            display: flex;
+            margin-bottom: 22px;
+        }
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+        .message-row.assistant {
+            justify-content: flex-start;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 14px 17px;
+            border-radius: 16px;
+            line-height: 1.6;
+            font-size: 15px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .user .message {
+            background: #2563eb;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .assistant .message {
+            background: #1f2937;
+            color: #f3f4f6;
+            border-bottom-left-radius: 5px;
+        }
+
+        .loading {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .input-wrapper {
+            padding: 18px 24px 22px;
+            background: #111827;
+            border-top: 1px solid #273244;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            border: 1px solid #374151;
+            border-radius: 14px;
+            background: #1f2937;
+            padding: 10px;
+        }
+
+        textarea {
+            flex: 1;
+            resize: none;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: white;
+            font-size: 15px;
+            font-family: inherit;
+            min-height: 48px;
+            max-height: 180px;
+            padding: 10px;
+        }
+
+        textarea::placeholder {
+            color: #6b7280;
+        }
+
+        .send-button {
+            border: none;
+            background: #2563eb;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 19px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .send-button:hover {
+            background: #1d4ed8;
+        }
+
+        .send-button:disabled {
+            background: #374151;
+            cursor: default;
+        }
+
+        .footer-text {
+            text-align: center;
+            color: #6b7280;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 700px) {
+            .chat-container {
+                padding: 16px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .header {
+                padding: 14px 16px;
+            }
+
+            .input-wrapper {
+                padding: 12px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>
-        Infectious Disease AI Workshop
-    </h1>
+<div class="app">
 
-    <p>
-        Ask the local language model a question.
-    </p>
+    <div class="header">
+        <div class="header-left">
+            <h1>MICI5400GPT</h1>
+            <p>Local LLM · Workshop Environment</p>
+        </div>
 
-    <textarea
-        id="question"
-        rows="6"
-        cols="80"
-        placeholder="Enter a question..."
-    ></textarea>
+        <button
+            class="clear-button"
+            onclick="clearChat()"
+        >
+            Clear chat
+        </button>
+    </div>
 
-    <br><br>
 
-    <button onclick="askModel()">
-        Ask
-    </button>
+    <div
+        id="chat"
+        class="chat-container"
+    >
 
-    <h2>Response</h2>
+        <div
+            id="welcome"
+            class="welcome"
+        >
+            <h2>How can I help?</h2>
 
-    <pre id="answer"></pre>
+            <p>
+                Ask a question about infectious diseases.
+                Later, this assistant will retrieve supporting
+                evidence from the workshop document collection
+                before generating its response.
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="input-wrapper">
+
+        <div class="input-box">
+
+            <textarea
+                id="question"
+                placeholder="Ask a question..."
+                rows="1"
+                oninput="autoResize(this)"
+                onkeydown="handleKey(event)"
+            ></textarea>
+
+            <button
+                id="sendButton"
+                class="send-button"
+                onclick="askModel()"
+            >
+                ↑
+            </button>
+
+        </div>
+
+        <div class="footer-text">
+            Local AI responses may contain errors. Verify important claims.
+        </div>
+
+    </div>
+
+</div>
 
 
 <script>
 
+const chat = document.getElementById("chat");
+const questionBox = document.getElementById("question");
+const sendButton = document.getElementById("sendButton");
+
+
+function addMessage(role, text, id = null) {
+
+    const welcome =
+        document.getElementById("welcome");
+
+    if (welcome) {
+        welcome.remove();
+    }
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "message-row " + role;
+
+    if (id) {
+        row.id = id;
+    }
+
+    const message =
+        document.createElement("div");
+
+    message.className = "message";
+    message.textContent = text;
+
+    row.appendChild(message);
+    chat.appendChild(row);
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+    return message;
+}
+
+
 async function askModel() {
 
     const question =
-        document.getElementById("question").value;
+        questionBox.value.trim();
 
-    const answer =
-        document.getElementById("answer");
+    if (!question) {
+        return;
+    }
 
-    answer.textContent = "Generating...";
+    addMessage(
+        "user",
+        question
+    );
+
+    questionBox.value = "";
+    questionBox.style.height = "auto";
+
+    sendButton.disabled = true;
+
+    const loadingMessage =
+        addMessage(
+            "assistant",
+            "Generating response..."
+        );
+
+    loadingMessage.classList.add(
+        "loading"
+    );
 
     try {
 
-        const response = await fetch(
-            "/ask",
-            {
-                method: "POST",
+        const response =
+            await fetch(
+                "/ask",
+                {
+                    method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                body: JSON.stringify({
-                    question: question
-                })
-            }
+                    body: JSON.stringify({
+                        question: question
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        loadingMessage.classList.remove(
+            "loading"
         );
 
-        const data = await response.json();
+        if (!response.ok || data.error) {
 
-        if (data.error) {
-            answer.textContent =
-                "Error: " + data.error;
+            loadingMessage.textContent =
+                "Error: " +
+                (
+                    data.error ||
+                    "Request failed."
+                );
 
-            return;
         }
 
-        answer.textContent =
-            data.answer;
+        else {
+
+            loadingMessage.textContent =
+                data.answer;
+
+        }
 
     }
 
     catch (error) {
 
-        answer.textContent =
-            "Request failed: " + error;
+        loadingMessage.classList.remove(
+            "loading"
+        );
+
+        loadingMessage.textContent =
+            "Unable to contact the server.";
 
     }
 
+    finally {
+
+        sendButton.disabled = false;
+        questionBox.focus();
+
+        chat.scrollTop =
+            chat.scrollHeight;
+    }
+}
+
+
+function clearChat() {
+
+    chat.innerHTML = `
+        <div
+            id="welcome"
+            class="welcome"
+        >
+            <h2>How can I help?</h2>
+
+            <p>
+                Ask a question about infectious diseases.
+                Later, this assistant will retrieve supporting
+                evidence from the workshop document collection
+                before generating its response.
+            </p>
+        </div>
+    `;
+
+    questionBox.value = "";
+    questionBox.focus();
+}
+
+
+function handleKey(event) {
+
+    if (
+        event.key === "Enter" &&
+        !event.shiftKey
+    ) {
+
+        event.preventDefault();
+        askModel();
+    }
+}
+
+
+function autoResize(element) {
+
+    element.style.height = "auto";
+
+    element.style.height =
+        Math.min(
+            element.scrollHeight,
+            180
+        ) + "px";
 }
 
 </script>
 
 </body>
-
 </html>
