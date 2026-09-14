@@ -1,0 +1,31 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# RAG indexes
+app/data/index/*
+!app/data/index/.gitkeep
+
+# Optional documents
+# Uncomment if documents should not be committed
+# app/data/documents/*
+
+# HuggingFace cache
+.cache/
+
+# Logs
+*.log

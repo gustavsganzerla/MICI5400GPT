@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Infectious Disease AI Workshop
+    </title>
+
+</head>
+
+<body>
+
+    <h1>
+        Infectious Disease AI Workshop
+    </h1>
+
+    <p>
+        Ask the local language model a question.
+    </p>
+
+    <textarea
+        id="question"
+        rows="6"
+        cols="80"
+        placeholder="Enter a question..."
+    ></textarea>
+
+    <br><br>
+
+    <button onclick="askModel()">
+        Ask
+    </button>
+
+    <h2>Response</h2>
+
+    <pre id="answer"></pre>
+
+
+<script>
+
+async function askModel() {
+
+    const question =
+        document.getElementById("question").value;
+
+    const answer =
+        document.getElementById("answer");
+
+    answer.textContent = "Generating...";
+
+    try {
+
+        const response = await fetch(
+            "/ask",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    question: question
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.error) {
+            answer.textContent =
+                "Error: " + data.error;
+
+            return;
+        }
+
+        answer.textContent =
+            data.answer;
+
+    }
+
+    catch (error) {
+
+        answer.textContent =
+            "Request failed: " + error;
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

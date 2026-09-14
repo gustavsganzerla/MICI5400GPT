@@ -1,0 +1,26 @@
+services:
+
+  web:
+    build: ./app
+    container_name: workshop_web
+    ports:
+      - "5000:5000"
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:4b}
+    volumes:
+      - ./app:/app
+      - ./app/data:/app/data
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: workshop_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+
+volumes:
+  ollama_models:
