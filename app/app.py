@@ -99,7 +99,25 @@ def ask():
 
     if not use_rag:
 
-        prompt = question
+        if not use_rag:
+
+            prompt = f"""
+                You are an assistant supporting an infectious disease researcher.
+
+                Answer the QUESTION below.
+
+                Rules:
+                1. Answer the question directly.
+                2. Do not invent facts.
+                3. If you are uncertain, state the uncertainty.
+                4. Keep the answer concise and complete, preferably under 150 words.
+
+                QUESTION
+
+        {question}
+
+        ANSWER
+        """.strip()
 
 
     #

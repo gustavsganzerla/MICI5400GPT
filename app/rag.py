@@ -150,41 +150,39 @@ def build_augmented_prompt(
 
         evidence_parts.append(
             f"""
-SOURCE {i}
+[Source {i}]
 Document: {result["source"]}
-Chunk: {result["chunk_id"]}
-Similarity score: {result["score"]:.3f}
+Score: {result['score']}
+Page: {result.get("page", "unknown")}
 
 {result["text"]}
 """.strip()
         )
 
-    evidence = "\n\n---\n\n".join(
+
+    evidence = "\n\n".join(
         evidence_parts
     )
 
+
     prompt = f"""
-You are an assistant supporting an infectious disease researcher.
+Answer the question using the evidence provided below.
 
-Answer the QUESTION using only the information contained in the EVIDENCE below.
+If the answer is explicitly stated or can be directly supported by the evidence, answer the question and cite the relevant source as [Source 1], [Source 2], etc.
 
-Rules:
+Only say "The provided evidence is insufficient to answer this question" if the evidence does not contain information that answers the question.
 
-1. Do not use outside information.
-2. Do not invent facts.
-3. If the evidence is insufficient, explicitly say that the available evidence is insufficient.
-4. When making a claim, identify the supporting source using [Source 1], [Source 2], etc.
-5. If sources disagree, describe the disagreement rather than selecting one value without justification.
+Keep the answer concise and complete, preferably under 150 words.
 
-EVIDENCE
+EVIDENCE:
 
 {evidence}
 
-QUESTION
-
+QUESTION:
 {question}
 
-ANSWER
+ANSWER:
 """.strip()
+
 
     return prompt
