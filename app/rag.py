@@ -168,7 +168,7 @@ Page: {result.get("page", "unknown")}
     prompt = f"""
 Answer the question using the evidence provided below.
 
-If the answer is explicitly stated or can be directly supported by the evidence, answer the question and cite the relevant source as [Source 1], [Source 2], etc.
+If the answer is explicitly stated or can be directly supported by the evidence, answer the question.
 
 Only say "The provided evidence is insufficient to answer this question" if the evidence does not contain information that answers the question.
 
